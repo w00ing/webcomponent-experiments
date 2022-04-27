@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0 max-scale=1.0"
+    />
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="">
+    <script>
+      tailwind.config = {
+        prefix: "tw-",
+      };
+      document.body.innerHTML = `<div id="intro-scenario-1" class="tw-bg-[#3A3A3A] tw-relative">
+        <img is="intro-img" class="tw-w-full" id="intro-connect-img" index="0">
+        </img>
+        <div
+          id="intro-connect-button-wrapper"
+          class="tw-z-10 tw-absolute tw-left-0 tw-bottom-[0.6875rem] tw-flex tw-w-full tw-justify-between tw-px-[41.5px]"
+        >
+          <button
+            is="navigation-button"
+            action-type="close"
+            class="tw-text-white tw-w-[5.375rem] tw-h-[2.5rem] tw-font-medium tw-text-[0.875rem]"
+          >
+            닫기
+          </button>
+          <button
+            is="navigation-button"
+            action-type="next"
+            class="tw-text-white tw-w-[5.375rem] tw-h-[2.5rem] tw-font-medium tw-text-[0.875rem] tw-underline"
+          >
+            다음
+          </button>
+        </div>
+        <button
+          is="finish-button"
+          show="false"
+          id="intro-finish-button"
+          class="tw-bg-[#91CED5] tw-h-[3.75rem] tw-z-10 tw-absolute tw-left-0 tw-bottom-0 tw-w-full tw-justify-center tw-items-center tw-px-[41.5px] tw-text-white tw-text-center"
+        >
+          데이터 연결하러 가기
+        </button>
+      </div>`;
+      const images = [
+        "https://lh3.googleusercontent.com/zUz5rpxtrR5bXApNr_xj3JlIKpA4z9fVbYktwMdWMOXVIU9Vb3aSb5jGHlKwG1LoSAvMUFq9mh2qKdLopwBPF4X3FWZmQcqUiYSL806EwclRnHNrtzuT0x8vFqZl_HytNR0vHDZ7=w2400",
+        "https://lh3.googleusercontent.com/yiSPvKvyUmszlBNShLuQNnwuH19_YrxnKzIsnvXyJTo4sRVkvyHNNj9S0Nm56SE_njTa1do5k9owULx68Z3YLBfKPaQ0MgzO4QCcU-SnGU47UdMVXzihMvYK3XUm8Yih6oaOQH7X=w2400",
+        "https://lh3.googleusercontent.com/9Bw1DEfGfR6Gf2QB3IIhB9-K2smm5qjM65cqsSajVHZHmlYvjMFm0U-tAFTSmkGzrJ-lSV0gxZnpeyQP9RUg-fT8sbOw9ZAyZX80O6m0quWEGTWBIlk8ZDEuG-BKIsMFySqypRCy=w2400",
+        "https://lh3.googleusercontent.com/rXSuPWgiwvPv7m7zILrVUrnFrnzoub67hhvzrdSLRwFsvxEgFvR2wUZ0FMWiR3iiwXVD_Ae4AvmvIq9YlWZ5VNFf1uWVDd4-qAqHmmtLxAT5C2nPAhLgLYcFklF1IQYL_QmMG1MV=w2400",
+        "https://lh3.googleusercontent.com/97Eakbmo8Mkee5zNQUuFSTmwSQbRsKb__QGY7rkRLpWMtEyCvJwzh8oRyq-GclaqMGsgvE9pxbCgiCWvW6fsK8yNpDbt_lgj1UeJ1Ub2N_y1Wy27pu87JlDNWCkhCx2YSehHxRDF=w2400",
+        "https://lh3.googleusercontent.com/wV6cyQJ4EDc2UlZKMaG4QGAkhPM4P2MhNkaov7UFlKLAeALSE5MSSS32Y2XHqQx2Z4maiCXju23IGEnTmSgdX3NmCDx9gaIdjavSfe7XjXc3LwFgeX0iNjtUMpKvVMQpdZKK-QRk=w2400",
+      ];
+
+      class FinishBtn extends HTMLButtonElement {
+        constructor() {
+          super();
+        }
+        connectedCallback() {
+          this.render();
+        }
+
+        show() {
+          this.setAttribute("style", "display: flex");
+        }
+
+        hide() {
+          this.setAttribute("style", "display: none");
+        }
+
+        eventListener() {
+          const wrapper = document.getElementById("intro-scenario-1");
+          wrapper.remove();
+          this.removeEventListener("click", this.eventListener);
+        }
+        render() {
+          this.removeEventListener("click", this.eventListener);
+          this.addEventListener("click", this.eventListener);
+        }
+        static get observedAttributes() {
+          return ["show"];
+        }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+          if (newValue === "true") {
+            this.show();
+          } else {
+            this.hide();
+          }
+        }
+      }
+
+      class NavigationBtn extends HTMLButtonElement {
+        constructor() {
+          super();
+        }
+        connectedCallback() {
+          this.render();
+        }
+
+        goToNextImage() {
+          const customImageEl = document.querySelector("#intro-connect-img");
+          const currentImgIndex = customImageEl.getAttribute("index") || 0;
+          console.log("INDEX", currentImgIndex);
+          customImageEl.setAttribute("index", Number(currentImgIndex) + 1);
+          if (Number(currentImgIndex) + 2 === images.length) {
+            document
+              .getElementById("intro-connect-button-wrapper")
+              .replaceChildren();
+            document
+              .getElementById("intro-finish-button")
+              .setAttribute("show", "true");
+            this.removeEventListener("click", this.eventListener);
+            return;
+          }
+        }
+        close() {
+          const wrapper = document.getElementById("intro-scenario-1");
+          wrapper.remove();
+          this.removeEventListener("click", this.eventListener);
+        }
+
+        eventListener() {
+          if (this.getAttribute("action-type") === "next") {
+            this.goToNextImage();
+          } else if (this.getAttribute("action-type") === "close") {
+            this.close();
+          }
+        }
+        render() {
+          this.removeEventListener("click", this.eventListener);
+          this.addEventListener("click", this.eventListener);
+        }
+      }
+      class IntroImg extends HTMLImageElement {
+        constructor() {
+          super();
+        }
+        connectedCallback() {
+          this.render();
+        }
+        render() {
+          this.className = "tw-w-full tw-h-auto";
+          this.src = images[this.getAttribute("index")];
+        }
+
+        static get observedAttributes() {
+          return ["index"];
+        }
+
+        updateSrc() {
+          this.src = images[this.getAttribute("index")];
+        }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+          if (oldValue !== newValue) {
+            this.updateSrc();
+          }
+        }
+      }
+
+      customElements.define("intro-img", IntroImg, { extends: "img" });
+      customElements.define("navigation-button", NavigationBtn, {
+        extends: "button",
+      });
+      customElements.define("finish-button", FinishBtn, {
+        extends: "button",
+      });
+    </script>
+  </body>
+</html>
