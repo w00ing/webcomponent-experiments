@@ -2,10 +2,39 @@ import("https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js").then(
   litModule => {
     const { LitElement, html, css } = litModule;
 
+    const HASH_LINKAGE_1 = "#/linkage/1";
+    const HASH_LINKAGE_2 = "#/linkage/2";
+
+    // hashchange에 붙일 event listener.
+    // hash가 #/linkage/1이면 뒤로가기 버튼을 추가하고,
+    // hash가 #/linkage/2이면 뒤로가기 버튼을 제거한다.
+    // 둘 다 아닌 경우에는 event listener를 제거한다.
+    const onPopState = event => {
+      console.log(event);
+      switch (event.currentTarget.location.hash) {
+        case HASH_LINKAGE_1:
+          appEl.appendChild(backButtonEl);
+          break;
+        case HASH_LINKAGE_2:
+          appEl.removeChild(backButtonEl);
+          break;
+        default:
+          window.removeEventListener("popstate", onPopState);
+          break;
+      }
+    };
+    window.addEventListener("hashchange", onPopState);
+
     // 실험 플로우가 끝나면 원래 튜토리얼로 돌아갈 수 있도록,
     // /#/linkage/1 에서의 appEl를 미리 저장
     const rootEl = document.getElementById("root");
     const appEl = rootEl.querySelector(".App.fullscreen");
+
+    // /#linkage/1에 뒤로가기 버튼 추가
+    const backButtonEl = document.createElement("back-button");
+    if (window.location.hash === HASH_LINKAGE_1) {
+      appEl.appendChild(backButtonEl);
+    }
 
     const items = [
       {
@@ -35,11 +64,11 @@ import("https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js").then(
           position: relative;
         }
         .back-button {
-          width: 4.1875rem;
-          height: 4.1875rem;
+          width: auto;
+          height: 2.5rem;
           position: absolute;
-          left: 1.25rem;
-          top: 1rem;
+          left: 4.3vw;
+          top: calc(env(safe-area-inset-top) + 2.17687vh);
           display: flex;
           background: none;
           border: none;
@@ -97,10 +126,50 @@ import("https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js").then(
       _goBack(e) {
         if (this.itemIndex - 1 === -1) return;
         this.itemIndex--;
-        // rootEl.replaceChildren(appEl);
       }
     }
+
+    // linkage/1에 추가할 뒤로가기 버튼
+    class BackButton extends LitElement {
+      static properties = {
+        show: { type: Boolean },
+      };
+
+      static styles = css`
+        .back-button {
+          width: auto;
+          height: 2.5rem;
+          position: absolute;
+          left: 4.3vw;
+          top: calc(env(safe-area-inset-top) + 2.17687vh);
+          display: flex;
+          background: none;
+          border: none;
+        }
+        img {
+          width: 100%;
+          height: 100%;
+        }
+      `;
+      constructor() {
+        super();
+        this.show = false;
+      }
+      render() {
+        return html` <button class="back-button" @click="${this._goBack}">
+          <img
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAnUExURUdwTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH6NKgYAAAAMdFJOUwDyKA3lH6eYMYrEP4H31jgAAAFKSURBVGje7ZgxagJRFEU/I4G0ARkRfhEMKHZCtuACbHSwVBAsbBTsLCxttXYFSeMWBBGUt6jM/PQjPxxhAvcs4HJ8f+a+7zgnhBBCCCGEEEKIijCE88ZfazQvmVizRwZm3i5k4MvS2MCRN7v1WEGbkRPM864DUHADC44LwXdQ8Gh2noKCnVwwpQXn8ATTLXvE1RakJ5hVfYK44IQW9KxgsoQF2x6umaKo0ZqBBfNdDG8SD2+SMMHPMuIF7fxWQv0QFbi3hzRidn+yeBx4P0UEvtKBNfonh8fa6v0yVtHNYN+tEj7+Ug3gg82/eng5/CqS9RWmmKKK9Ap4giK9RvFFz19FnqB4/B9TRF8X+k7sElwxg//4hIM2XnEAHzRb3fS1KdzdWcWiF2/odyD6M0uhyAbm1d1AA10X/pjmajtWUAghhBBCCCGEqDg/mgU0joovq3oAAAAASUVORK5CYII="
+          />
+        </button>`;
+      }
+      _goBack() {
+        console.log("BACK!!");
+        rootEl.replaceChildren(experimentEl);
+      }
+    }
+
     customElements.define("image-wrapper", ImageWrapper);
+    customElements.define("back-button", BackButton);
 
     // 실험 element로 root 안의 내용을 대체
     const experimentEl = document.createElement("image-wrapper");
